@@ -1,10 +1,10 @@
-import { Server } from "aedes";
-import { createServer, Socket } from "net";
+import { Server, PublishPacket } from "aedes";
+import { createServer } from "net";
 import mongoose from "mongoose";
 
 const mqemitter = require("mqemitter-mongodb");
 const mongoPersistence = require("aedes-persistence-mongodb");
-const MONGO_URL = "mongodb://127.0.0.1:27017";
+const MONGO_URL = "mongodb://localhost/rmvs-server";
 
 function startBroker(db: any) {
   const port = 1883;
@@ -38,6 +38,18 @@ function startBroker(db: any) {
       "from broker",
       broker.id
     );
+
+    subscriptions.map((s) => {
+      const packet: PublishPacket = {
+        topic: s.topic,
+        payload: "ON",
+        cmd: "publish",
+        qos: s.qos,
+        dup: true,
+        retain: true,
+      };
+      broker.publish(packet, (error) => console.log(error));
+    });
   });
 
   broker.on("unsubscribe", function (subscriptions, client) {
@@ -94,7 +106,7 @@ function startBroker(db: any) {
   });
 }
 function startDB() {
-  mongoose.connect("mongodb://localhost/rmvs-server", {
+  mongoose.connect(MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
