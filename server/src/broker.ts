@@ -5,6 +5,18 @@ import { Db } from 'mongodb';
 const mqemitter = require('mqemitter-mongodb');
 const mongoPersistence = require('aedes-persistence-mongodb');
 
+interface FlowSensor {
+  rate: number;
+  total: number;
+  time: number;
+}
+
+enum Semaphore {
+  RED = 'RED',
+  GREEN = 'GREEN',
+  YELLOW = 'YELLOW',
+}
+
 export function startBroker(db: Db): Aedes {
   const broker = Server({
     heartbeatInterval: 60000,
@@ -20,6 +32,36 @@ export function startBroker(db: Db): Aedes {
         packet.topic,
         packet.payload,
       );
+      if (packet.topic === 'sensor/flow') {
+        const sensor: FlowSensor = JSON.parse(packet.payload.toString());
+        console.log('\npacket.payload', sensor);
+
+        const publishPacket: PublishPacket = {
+          topic: 'alert/semaphore',
+          payload: 'ON',
+          cmd: 'publish',
+          qos: 0,
+          dup: true,
+          retain: true,
+        };
+
+        if (sensor.rate < 10) {
+          broker.publish(
+            { ...publishPacket, payload: Semaphore.RED },
+            (error) => console.log(error),
+          );
+        } else if (sensor.rate < 20) {
+          broker.publish(
+            { ...publishPacket, payload: Semaphore.YELLOW },
+            (error) => console.log(error),
+          );
+        } else {
+          broker.publish(
+            { ...publishPacket, payload: Semaphore.GREEN },
+            (error) => console.log(error),
+          );
+        }
+      }
     }
   });
 

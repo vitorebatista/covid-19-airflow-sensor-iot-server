@@ -33,6 +33,8 @@ float flowRate;
 unsigned int flowMilliLitres;
 unsigned long totalMilliLitres;
 
+StaticJsonDocument<200> flowJson;
+
 EspMQTTClient client(wifiSsid, wifiPassword, mqttServerIp, mqttUsername,
                      mqttPassword, mqttClientName, mqttServerPort);
 
@@ -101,25 +103,29 @@ void onConnectionEstablished()
   });
 
   // Subscribe to "mytopic/wildcardtest/#" and display received message to Serial
-  client.subscribe("buzzer/action/#", [](const String &topic, const String &payload) {
+  client.subscribe("alert/semaphore", [](const String &topic, const String &payload) {
     Serial.println(topic + ": " + payload);
-    tone(BUZZER, frequency);
-    delay(timeOn);
-    noTone(BUZZER);
-    delay(timeOff);
-
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_YELLOW, LOW);
-    digitalWrite(LED_GREEN, HIGH);
+    // tone(BUZZER, frequency);
+    // delay(timeOn);
+    // noTone(BUZZER);
+    // delay(timeOff);
+    showLed(payload);
   });
 
   // Publish a message to "mytopic/test"
-  client.publish("mytopic/test", "This is a message"); // You can activate the retain flag by setting the third parameter to true
+  // client.publish("mytopic/test", "This is a message"); // You can activate the retain flag by setting the third parameter to true
 
   // Execute delayed instructions
   client.executeDelayed(5 * 1000, []() {
     client.publish("mytopic/test", "This is a message sent 5 seconds later");
   });
+}
+
+void showLed(const String color)
+{
+  digitalWrite(LED_RED, color == "RED" ? HIGH : LOW);
+  digitalWrite(LED_YELLOW, color == "YELLOW" ? HIGH : LOW);
+  digitalWrite(LED_GREEN, color == "GREEN" ? HIGH : LOW);
 }
 
 void flowLoop()
@@ -161,6 +167,17 @@ void flowLoop()
     Serial.print("mL / ");
     Serial.print(totalMilliLitres / 1000);
     Serial.println("L");
+
+    flowJson["rate"] = int(flowRate);
+    flowJson["total"] = totalMilliLitres;
+    flowJson["time"] = currentMillis;
+
+    String flowString;
+    serializeJson(flowJson, flowString);
+    if (client.isConnected())
+    {
+      client.publish("sensor/flow", flowString); // You can activate the retain flag by setting the third parameter to true
+    }
   }
 }
 
@@ -170,16 +187,16 @@ void loop()
 
   flowLoop();
 
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(LED_YELLOW, LOW);
-  digitalWrite(LED_GREEN, LOW);
-  delay(100); // wait for a second
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_YELLOW, HIGH);
-  digitalWrite(LED_GREEN, LOW);
-  delay(100); // wait for a second
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_YELLOW, LOW);
-  digitalWrite(LED_GREEN, HIGH);
-  delay(100); // wait for a second
+  // digitalWrite(LED_RED, HIGH);
+  // digitalWrite(LED_YELLOW, LOW);
+  // digitalWrite(LED_GREEN, LOW);
+  // delay(100); // wait for a second
+  // digitalWrite(LED_RED, LOW);
+  // digitalWrite(LED_YELLOW, HIGH);
+  // digitalWrite(LED_GREEN, LOW);
+  // delay(100); // wait for a second
+  // digitalWrite(LED_RED, LOW);
+  // digitalWrite(LED_YELLOW, LOW);
+  // digitalWrite(LED_GREEN, HIGH);
+  // delay(100); // wait for a second
 }
