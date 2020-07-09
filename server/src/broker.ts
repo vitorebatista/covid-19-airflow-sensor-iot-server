@@ -1,20 +1,16 @@
-import { Server, PublishPacket } from 'aedes'
-import { createServer } from 'net'
+/* eslint-disable @typescript-eslint/no-var-requires */
+import { Aedes, PublishPacket, Server } from 'aedes';
+import { Db } from 'mongodb';
 
-const mqemitter = require('mqemitter-mongodb')
-const mongoPersistence = require('aedes-persistence-mongodb')
+const mqemitter = require('mqemitter-mongodb');
+const mongoPersistence = require('aedes-persistence-mongodb');
 
-export function startBroker (db: any) {
-  const port = 1883
+export function startBroker(db: Db): Aedes {
   const broker = Server({
     heartbeatInterval: 60000,
-    mq: mqemitter({
-      db
-    }),
-    persistence: mongoPersistence({
-      db
-    })
-  })
+    mq: mqemitter({ db }),
+    persistence: mongoPersistence({ db }),
+  });
 
   broker.on('publish', (packet, client) => {
     if (client) {
@@ -22,10 +18,10 @@ export function startBroker (db: any) {
         '\n(publish) %s : topic %s : %s',
         client.id,
         packet.topic,
-        packet.payload
-      )
+        packet.payload,
+      );
     }
-  })
+  });
 
   broker.on('subscribe', function (subscriptions, client) {
     console.log(
@@ -34,21 +30,21 @@ export function startBroker (db: any) {
         '\x1b[0m subscribed to topics: ' +
         subscriptions.map((s) => s.topic).join('\n'),
       'from broker',
-      broker.id
-    )
+      broker.id,
+    );
 
-    subscriptions.map((s) => {
+    subscriptions.map((subscription) => {
       const packet: PublishPacket = {
-        topic: s.topic,
+        topic: subscription.topic,
         payload: 'ON',
         cmd: 'publish',
-        qos: s.qos,
+        qos: subscription.qos,
         dup: true,
-        retain: true
-      }
-      broker.publish(packet, (error) => console.log(error))
-    })
-  })
+        retain: true,
+      };
+      broker.publish(packet, (error) => console.log(error));
+    });
+  });
 
   broker.on('unsubscribe', function (subscriptions, client) {
     console.log(
@@ -57,9 +53,9 @@ export function startBroker (db: any) {
         '\x1b[0m unsubscribed to topics: ' +
         subscriptions.join('\n'),
       'from broker',
-      broker.id
-    )
-  })
+      broker.id,
+    );
+  });
 
   // fired when a client connects
   broker.on('client', function (client) {
@@ -68,9 +64,9 @@ export function startBroker (db: any) {
         (client ? client.id : client) +
         '\x1b[0m',
       'to broker',
-      broker.id
-    )
-  })
+      broker.id,
+    );
+  });
 
   // fired when a client disconnects
   broker.on('clientDisconnect', function (client) {
@@ -79,9 +75,9 @@ export function startBroker (db: any) {
         (client ? client.id : client) +
         '\x1b[0m',
       'to broker',
-      broker.id
-    )
-  })
+      broker.id,
+    );
+  });
 
   // fired when a message is published
   broker.on('publish', async function (packet, client) {
@@ -93,13 +89,9 @@ export function startBroker (db: any) {
       'on',
       packet.topic,
       'to broker',
-      broker.id
-    )
-  })
+      broker.id,
+    );
+  });
 
-  // MQTT server
-  const server = createServer(broker.handle)
-  server.listen(port, function () {
-    console.log('server started and listening on port ', port)
-  })
+  return broker;
 }
