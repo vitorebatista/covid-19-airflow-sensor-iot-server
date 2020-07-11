@@ -50,9 +50,8 @@ void setup()
   Serial.println('\n');
 
   // Optionnal functionnalities of EspMQTTClient :
-  client.enableDebuggingMessages();                                          // Enable debugging messages sent to serial output
-  client.enableHTTPWebUpdater();                                             // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overrited with enableHTTPWebUpdater("user", "password").
-  client.enableLastWillMessage("TestClient/lastwill", "I am going offline"); // You can activate the retain flag by setting the third parameter to true
+  client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
+  client.enableHTTPWebUpdater();    // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overrited with enableHTTPWebUpdater("user", "password").
 
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_YELLOW, OUTPUT);
@@ -74,46 +73,21 @@ void setup()
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
-// WARNING : YOU MUST IMPLEMENT IT IF YOU USE EspMQTTClient
 void onConnectionEstablished()
 {
-  // StaticJsonDocument<200> jsonDoc;
-
-  // char json[] = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-  // auto error = deserializeJson(jsonDoc, json);
-
-  // if (error)
-  // {
-  //   Serial.print(F("deserializeJson() failed with code "));
-  //   Serial.println(error.c_str());
-  //   // return false;
-  // }
-  // else
-  // {
-  //   const char *sensor = jsonDoc["sensor"];
-  //   long time = jsonDoc["time"];
-  //   double latitude = jsonDoc["data"][0];
-  //   double longitude = jsonDoc["data"][1];
-  //   Serial.println(sensor);
-  // }
-
-  // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe("mytopic/test", [](const String &payload) {
-    Serial.println(payload + "!!!");
-  });
 
   // Subscribe to "mytopic/wildcardtest/#" and display received message to Serial
   client.subscribe("alert/semaphore", [](const String &topic, const String &payload) {
     Serial.println(topic + ": " + payload);
+
+    // TODO: implement buzzer logic
     // tone(BUZZER, frequency);
     // delay(timeOn);
     // noTone(BUZZER);
     // delay(timeOff);
+
     showLed(payload);
   });
-
-  // Publish a message to "mytopic/test"
-  // client.publish("mytopic/test", "This is a message"); // You can activate the retain flag by setting the third parameter to true
 
   // Execute delayed instructions
   client.executeDelayed(5 * 1000, []() {
@@ -137,8 +111,6 @@ void flowLoop()
     pulse1Sec = pulseCount;
     pulseCount = 0;
 
-    Serial.print("Pulse Count: ");
-    Serial.print(int(pulseCount));
     // Because this loop may not complete in exactly 1 second intervals we calculate
     // the number of milliseconds that have passed since the last execution and use
     // that to scale the output. We also apply the calibrationFactor to scale the output
@@ -176,7 +148,7 @@ void flowLoop()
     serializeJson(flowJson, flowString);
     if (client.isConnected())
     {
-      client.publish("sensor/flow", flowString); // You can activate the retain flag by setting the third parameter to true
+      client.publish("sensor/flow", flowString);
     }
   }
 }
@@ -186,17 +158,4 @@ void loop()
   client.loop();
 
   flowLoop();
-
-  // digitalWrite(LED_RED, HIGH);
-  // digitalWrite(LED_YELLOW, LOW);
-  // digitalWrite(LED_GREEN, LOW);
-  // delay(100); // wait for a second
-  // digitalWrite(LED_RED, LOW);
-  // digitalWrite(LED_YELLOW, HIGH);
-  // digitalWrite(LED_GREEN, LOW);
-  // delay(100); // wait for a second
-  // digitalWrite(LED_RED, LOW);
-  // digitalWrite(LED_YELLOW, LOW);
-  // digitalWrite(LED_GREEN, HIGH);
-  // delay(100); // wait for a second
 }
