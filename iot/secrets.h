@@ -1,0 +1,7 @@
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
+#define MQTT_SERVER_IP ""
+#define MQTT_USERNAME ""
+#define MQTT_PASSWORD ""
+#define MQTT_CLIENT_NAME "RMVS_ESP8266"
+#define MQTT_SERVER_PORT 1883
