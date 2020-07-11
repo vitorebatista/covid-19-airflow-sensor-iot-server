@@ -1,0 +1,6 @@
+# Compiled binary
+build
+*.bin
+
+# dotenv environment variables file
+secrets.h
