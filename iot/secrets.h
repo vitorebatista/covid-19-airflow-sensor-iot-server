@@ -1,7 +1,0 @@
-#define WIFI_SSID "Orlando"
-#define WIFI_PASSWORD "84128387"
-#define MQTT_SERVER_IP "192.168.0.4"
-#define MQTT_USERNAME ""
-#define MQTT_PASSWORD ""
-#define MQTT_CLIENT_NAME "RMVS_ESP8266"
-#define MQTT_SERVER_PORT 1883
