@@ -1,5 +1,5 @@
 PORT = /dev/cu.usbserial-0001
-FQBN = "esp8266:esp8266:generic"
+FQBN = "esp8266:esp8266:nodemcuv2"
 TARGET = core-install lib-install
 
 all: $(TARGET)
@@ -20,7 +20,7 @@ lib-list:
 	arduino-cli lib list
 
 compile:
-	arduino-cli compile --fqbn "esp8266:esp8266:generic"
+	arduino-cli compile --fqbn $(FQBN)
 
 upload:
 	arduino-cli upload -p $(PORT) --fqbn $(FQBN)
