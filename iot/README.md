@@ -1,5 +1,7 @@
 # RMVS IOT (WORK IN PROGRESS)
 
+![Board](./images/board.png)
+
 ## Dependencies
 
 - Arduino
