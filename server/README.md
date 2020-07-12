@@ -1,25 +1,25 @@
-# RMVS Server (WORK IN PROGRESS)
+## Server (WORK IN PROGRESS)
 
-## Dependencies
+### Dependencies
 
 - Node v12 or higher
 - Yarn
 - Docker
 - Docker Compose
 
-## Installation
+### Installation
 
 ```bash
 $ yarn
 ```
 
-## Local environment
+### Local environment
 
 ```
 $ yarn dev:up
 ```
 
-## Running the app
+### Running the app
 
 ```bash
 # watch mode

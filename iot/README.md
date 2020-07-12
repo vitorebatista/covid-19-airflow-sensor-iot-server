@@ -1,8 +1,8 @@
-# RMVS IOT (WORK IN PROGRESS)
+## IOT (WORK IN PROGRESS)
 
 ![Board](./images/board.png)
 
-## Dependencies
+### Dependencies
 
 - Arduino
 - [Arduino-cli](https://arduino.github.io/arduino-cli/installation/)
@@ -33,7 +33,7 @@ EspMQTTClient     1.8.0     -         user
 PubSubClientTools 0.6       -         user
 ```
 
-## Compile and upload the sketch
+### Compile and upload the sketch
 
 To compile the sketch, you run the compile command above, but before this, don't forget to configure the `secrets.h` with your wifi and broker configurations.
 
