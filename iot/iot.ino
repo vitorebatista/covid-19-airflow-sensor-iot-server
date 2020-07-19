@@ -16,6 +16,7 @@ const char *mqttPassword = MQTT_PASSWORD;
 const char *mqttClientName = MQTT_CLIENT_NAME;
 const short mqttServerPort = MQTT_SERVER_PORT;
 
+bool isRed = false;
 // Buzzer configurations
 int frequency = 1000; //Specified in Hz
 int timeOn = 500;     //specified in milliseconds
@@ -80,26 +81,52 @@ void onConnectionEstablished()
   client.subscribe("alert/semaphore", [](const String &topic, const String &payload) {
     Serial.println(topic + ": " + payload);
 
-    // TODO: implement buzzer logic
-    // tone(BUZZER, frequency);
-    // delay(timeOn);
-    // noTone(BUZZER);
-    // delay(timeOff);
-
-    showLed(payload);
+    changeStatus(payload);
   });
 
-  // Execute delayed instructions
-  client.executeDelayed(5 * 1000, []() {
-    client.publish("mytopic/test", "This is a message sent 5 seconds later");
+  client.subscribe("alert/buzzer", [](const String &topic, const String &payload) {
+    Serial.println(topic);
+
+    if (payload == "ON")
+    {
+      playBuzzer();
+    }
+    else if (payload == "OFF")
+    {
+      stopBuzzer();
+    }
+    else
+    {
+      playBuzzer();
+      stopBuzzer();
+    }
   });
 }
 
-void showLed(const String color)
+void changeStatus(const String color)
 {
   digitalWrite(LED_RED, color == "RED" ? HIGH : LOW);
   digitalWrite(LED_YELLOW, color == "YELLOW" ? HIGH : LOW);
   digitalWrite(LED_GREEN, color == "GREEN" ? HIGH : LOW);
+
+  if (color == "RED" && !isRed)
+  {
+    playBuzzer();
+    stopBuzzer();
+  }
+  isRed = color == "RED";
+}
+
+void playBuzzer()
+{
+  tone(BUZZER, frequency);
+  delay(timeOn);
+}
+
+void stopBuzzer()
+{
+  noTone(BUZZER);
+  delay(timeOff);
 }
 
 void flowLoop()

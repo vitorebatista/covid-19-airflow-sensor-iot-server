@@ -45,6 +45,15 @@ export function startBroker(db: Db): Aedes {
           retain: true,
         };
 
+        broker.publish(
+          {
+            ...publishPacket,
+            topic: `sensor/airflow`,
+            payload: `${sensor.rate}`,
+          },
+          (error) => console.log(error),
+        );
+
         if (sensor.rate < 10) {
           broker.publish(
             { ...publishPacket, payload: Semaphore.RED },
