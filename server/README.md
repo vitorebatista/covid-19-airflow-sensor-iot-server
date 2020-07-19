@@ -28,3 +28,20 @@ $ yarn start:dev
 # production mode
 $ yarn start
 ```
+
+### Manual MQTT calls
+
+Play and Stop the buzzer
+
+```
+$ mosquitto_pub -h localhost -t "alert/buzzer" -m "ON" -p 1883
+$ mosquitto_pub -h localhost -t "alert/buzzer" -m "OFF" -p 1883
+```
+
+Change semaphore color
+
+```
+$ mosquitto_pub -h localhost -t "alert/semaphore" -m "RED" -p 1883
+$ mosquitto_pub -h localhost -t "alert/semaphore" -m "YELLOW" -p 1883
+$ mosquitto_pub -h localhost -t "alert/semaphore" -m "GREEN" -p 1883
+```
