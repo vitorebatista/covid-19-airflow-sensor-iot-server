@@ -1,16 +1,13 @@
 import { createServer } from 'net';
 import mongoose from 'mongoose';
+import { dataBase } from './database';
 import { startBroker } from './broker';
+import { scheduleJob } from './bree';
 
 async function main(): Promise<void> {
-  const MONGO_URL = 'mongodb://localhost/rmvs-server';
   const port = 1883;
-  mongoose.connect(MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const mongo = dataBase();
 
-  const mongo = mongoose.connection;
   mongo.on('error', console.error.bind(console, 'connection error:'));
   mongo.once('open', function () {
     console.log("We're connected!");
@@ -21,6 +18,8 @@ async function main(): Promise<void> {
     const server = createServer(broker.handle);
     server.listen(port, function () {
       console.log('Server started and listening on port ', port);
+
+      scheduleJob();
     });
   });
 }

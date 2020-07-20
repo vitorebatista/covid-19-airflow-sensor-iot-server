@@ -144,5 +144,9 @@ export function startBroker(db: Db): Aedes {
     );
   });
 
+  broker.on('clientError', function (error) {
+    console.log(error);
+  });
+
   return broker;
 }
