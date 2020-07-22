@@ -10,7 +10,7 @@
     "dev:up": "docker-compose up -d",
     "dev:down": "docker-compose down",
     "start:dev": "nodemon",
-    "start": "build && node build/index.js",
+    "start": "yarn build && node build/index.js",
     "lint": "eslint --ext .ts src/",
     "lint:fix": "eslint --ext .ts src/ --fix"
   },

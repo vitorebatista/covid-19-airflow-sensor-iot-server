@@ -7,7 +7,7 @@ export const scheduleJob = (data?: any) => {
       {
         name: 'one-and-half-minute',
         path: path.join(__dirname, 'jobs', 'one-and-half-minute.js'),
-        interval: '1m',
+        interval: '1.5 minutes',
         worker: {
           workerData: data,
         },

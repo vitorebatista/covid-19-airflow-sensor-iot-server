@@ -54,12 +54,12 @@ export function startBroker(db: Db): Aedes {
           (error) => console.log(error),
         );
 
-        if (sensor.rate < 10) {
+        if (sensor.rate < 5) {
           broker.publish(
             { ...publishPacket, payload: Semaphore.RED },
             (error) => console.log(error),
           );
-        } else if (sensor.rate < 20) {
+        } else if (sensor.rate < 18) {
           broker.publish(
             { ...publishPacket, payload: Semaphore.YELLOW },
             (error) => console.log(error),
