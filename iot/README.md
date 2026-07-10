@@ -1,50 +1,82 @@
-## IOT (WORK IN PROGRESS)
+# IoT
+
+ESP8266 (NodeMCU) firmware that reads a flow sensor every second, publishes the readings to the MQTT broker, and reacts to alerts by lighting a semaphore (red/yellow/green LEDs) and playing a buzzer.
 
 ![Board](./images/board.png)
 
-### Dependencies
+## Hardware
 
-- Arduino
-- [Arduino-cli](https://arduino.github.io/arduino-cli/installation/)
+- ESP8266 board (NodeMCU v2 — the Makefile uses the `esp8266:esp8266:nodemcuv2` FQBN)
+- Flow sensor (e.g. YF-S201)
+- 3 LEDs (red, yellow, green) + resistors
+- Piezo buzzer
 
-### Install the core for your board
+### Pinout
 
-To install the platform core and the libraries, run the following:
+| Component   | Pin | GPIO   |
+| ----------- | --- | ------ |
+| Red LED     | D8  | GPIO15 |
+| Yellow LED  | D7  | GPIO13 |
+| Green LED   | D6  | GPIO12 |
+| Buzzer      | D5  | GPIO14 |
+| Flow sensor | SD3 | GPIO10 |
+
+## Prerequisites
+
+- [arduino-cli](https://arduino.github.io/arduino-cli/installation/)
+- `make` (preinstalled on macOS/Linux)
+- The [server](../server/README.md) running, so the device has a broker to connect to
+
+## Setup
+
+### 1. Install the ESP8266 core and libraries
 
 ```sh
-$ make all
+make all
 ```
 
-Now verify we have installed the core and libraries properly by running:
+Verify the installation:
 
 ```sh
 $ make core-list
-
 ID              Installed Latest Name
 esp8266:esp8266 2.7.1     2.7.1
-```
 
-```sh
 $ make lib-list
 Name              Installed Available Location
 ArduinoJson       6.15.2    -         user
-PubSubClient      2.8       -         user
 EspMQTTClient     1.8.0     -         user
-PubSubClientTools 0.6       -         user
+...
 ```
 
-### Compile and upload the sketch
+### 2. Configure your credentials
 
-To compile the sketch, you run the compile command above, but before this, don't forget to configure the `secrets.h` with your wifi and broker configurations.
+Edit `secrets.h` with your Wi-Fi network and MQTT broker details (the broker is the machine running the [server](../server/README.md), port `1883`):
+
+```c
+#define WIFI_SSID "your-wifi-name"
+#define WIFI_PASSWORD "your-wifi-password"
+#define MQTT_SERVER_IP "192.168.0.10"   // IP of the machine running the server
+#define MQTT_USERNAME ""
+#define MQTT_PASSWORD ""
+#define MQTT_CLIENT_NAME "RMVS_ESP8266"
+#define MQTT_SERVER_PORT 1883
+```
+
+⚠️ Don't commit real credentials.
+
+### 3. Compile the sketch
 
 ```sh
 $ make compile
 Global variables use 30476 bytes (37%) of dynamic memory, leaving 51444 bytes for local variables. Maximum is 81920 bytes.
 ```
 
-This command will create an `esp8266.es8266.generic` folder inside `iot` folder. So you will need to access the url `http://rmvs_esp8266.local/` and upload the `.bin` firmware file to update your board.
+This creates a build folder (e.g. `esp8266.esp8266.nodemcuv2/`) inside `iot/` containing the `.bin` firmware.
 
-But if your board is connected in your USB port, you should be able to check whether it's been recognized by running:
+### 4. Upload the firmware
+
+**Via USB:** check that your board is recognized:
 
 ```sh
 $ make board-list
@@ -52,28 +84,41 @@ Port                            Type              Board Name FQBN Core
 /dev/cu.usbserial-0001          Serial Port (USB) Unknown
 ```
 
-If you have a different port (/dev/cu.usbserial-0001), you should copy your port name and change the variable `PORT` in the `Makefile` or you can specify the port to override the default value:
+If your port differs from the default (`/dev/cu.usbserial-0001`), either change the `PORT` variable in the `Makefile` or override it on the command line:
 
 ```sh
-$ make upload PORT=<YOUR_BOARD_PORT>
-No new serial port detected.
-esptool.py v2.8
-Serial port /dev/cu.usbserial-0001
-Connecting....
-Chip is ESP8266EX
-Features: WiFi
-Crystal is 26MHz
-MAC: dc:4f:22:5d:b6:17
-Uploading stub...
-Running stub...
-Stub running...
-Configuring flash size...
-Auto-detected Flash size: 4MB
-Flash params set to 0x0340
-Compressed 345680 bytes to 248217...
-Wrote 345680 bytes (248217 compressed) at 0x00000000 in 22.0 seconds (effective 125.9 kbit/s)...
-Hash of data verified.
+make upload PORT=/dev/cu.usbserial-XXXX
+```
 
+A successful upload ends with:
+
+```
+Hash of data verified.
 Leaving...
 Hard resetting via RTS pin...
 ```
+
+**Over the air (OTA):** once the board has run the firmware at least once, it exposes a web updater at `http://rmvs_esp8266.local/` — open it in a browser and upload the `.bin` file from the build folder. The updater uses the MQTT username/password from `secrets.h` as login.
+
+## Verify it's working
+
+Open the serial monitor at **115200 baud** (e.g. `arduino-cli monitor -p /dev/cu.usbserial-0001 -c baudrate=115200`). You should see the Wi-Fi/MQTT connection debug messages followed by flow readings every second:
+
+```
+Flow rate: 20L/min	Output Liquid Quantity: 1500mL / 1L
+```
+
+On the server side, the broker logs the `sensor/flow` messages as they arrive. You can also trigger the LEDs and buzzer manually — see [Manual MQTT calls](../server/README.md#manual-mqtt-calls).
+
+## Makefile reference
+
+Run `make help` to see all commands:
+
+| Command           | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `make all`        | Install the ESP8266 core and libraries         |
+| `make board-list` | List connected boards                          |
+| `make core-list`  | List installed platform cores                  |
+| `make lib-list`   | List installed libraries                       |
+| `make compile`    | Compile the sketch                             |
+| `make upload`     | Upload the sketch (`PORT=...` to override)     |
