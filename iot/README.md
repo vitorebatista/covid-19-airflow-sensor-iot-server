@@ -1,4 +1,4 @@
-# IoT (WORK IN PROGRESS)
+# IoT
 
 ESP8266 (NodeMCU) firmware that reads a flow sensor every second, publishes the readings to the MQTT broker, and reacts to alerts by lighting a semaphore (red/yellow/green LEDs) and playing a buzzer.
 

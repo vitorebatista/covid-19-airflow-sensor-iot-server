@@ -1,4 +1,4 @@
-# COVID-19 Airflow Sensor (WORK IN PROGRESS)
+# COVID-19 Airflow Sensor
 
 A proof of concept of a **Rapidly Manufactured Ventilation System (RMVS)** integrated with a flow sensor and an MQTT broker.
 

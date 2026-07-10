@@ -1,4 +1,4 @@
-# Server (WORK IN PROGRESS)
+# Server
 
 Node.js application that runs an [Aedes](https://github.com/moscajs/aedes) MQTT broker on port `1883`, persists every message to MongoDB, evaluates the flow readings published by the IoT device, and publishes alerts back (semaphore color and buzzer). A [Bree](https://github.com/breejs/bree) job scheduler periodically analyzes the stored readings.
 
